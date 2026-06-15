@@ -9,4 +9,4 @@ export type OrderStatus =
   | "cancelado";
 
 /** Statuses that count as a realized sale. */
-export const SALE_STATUSES: OrderStatus[] = ["pagado", "enviado", "entregado"];
+export const SALE_STATUSES = ["pagado", "enviado", "entregado"] as const satisfies readonly OrderStatus[];

@@ -27,7 +27,7 @@ export interface SalesSummary {
 }
 
 function inRange(createdAt: string, from?: string, to?: string): boolean {
-  const day = createdAt.slice(0, 10); // YYYY-MM-DD
+  const day = createdAt.slice(0, 10); // YYYY-MM-DD; assumes UTC (Z-suffixed) ISO timestamps
   if (from && day < from) return false;
   if (to && day > to) return false;
   return true;
