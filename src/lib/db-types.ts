@@ -1,4 +1,4 @@
-import type { Line, ProductStatus } from "@/domain/types";
+import type { Line, ProductStatus, MovementType } from "@/domain/types";
 
 export interface ProductRow {
   id: string;
@@ -34,7 +34,7 @@ export interface StockMovementRow {
   id: string;
   variant_id: string;
   delta: number;
-  type: import("@/domain/types").MovementType;
+  type: MovementType;
   reference: string | null;
   reason: string | null;
   created_at: string;
