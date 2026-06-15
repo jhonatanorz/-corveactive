@@ -5,6 +5,10 @@ describe("pesos", () => {
   it("converts whole pesos to centavos", () => {
     expect(pesos(690)).toBe(69000);
   });
+
+  it("rounds away floating-point drift", () => {
+    expect(pesos(6.9)).toBe(690); // 6.9 * 100 = 689.9999... without rounding
+  });
 });
 
 describe("formatMXN", () => {
