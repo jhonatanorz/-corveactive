@@ -10,7 +10,7 @@
 
 This is Phase 2 of 4 (Foundation → **Admin** → Catalog → Purchasing/Sales). It depends on Plan 1 being merged/available on the branch.
 
-**Prerequisite (human, one-time):** A Supabase project must exist and its keys placed in `.env.local`. Task 1 covers this; without it, Tasks 7–13 cannot be verified at runtime (they still type-check and build).
+**Prerequisite:** Development runs against a **local Supabase stack** (Supabase CLI + Docker — Postgres/Auth/Storage on localhost), which auto-applies `supabase/migrations/`. Task 1 starts it. The **cloud Supabase project + Vercel deploy are deferred to a final deployment step** (a later plan). Docker Desktop must be running for Task 1 and any runtime verification; the pure-logic tasks (3–6) need neither Docker nor Supabase.
 
 ---
 
@@ -40,53 +40,78 @@ Pure modules (`src/domain`, `src/lib/admin`) never import React/Next/Supabase. R
 
 ---
 
-## Task 1: Supabase project, migration, env, storage bucket
+## Task 1: Local Supabase stack, env, seed user & storage bucket
 
-**Files:** Modify `.env.local` (gitignored, not committed); Create `supabase/storage.md`.
+**Files:** Create `supabase/config.toml` (via CLI), `supabase/seed.sql`, `supabase/storage.md`; Modify `.env.local` (gitignored). Requires Docker running.
 
-This task is mostly human setup with a verification gate. If you are an agent and lack credentials, STOP and report NEEDS_CONTEXT requesting the keys / project.
+Development uses the local Supabase stack. The cloud project is a deployment-time concern, deferred.
 
-- [ ] **Step 1: Create the project & apply the migration (human)**
+- [ ] **Step 1: Initialize the Supabase project config**
 
-In the Supabase dashboard: create a project (region close to Mexico, e.g. `us-east-1`). Then apply `supabase/migrations/0001_init.sql`: open the SQL Editor, paste the file contents, run. Confirm all statements succeed.
-
-- [ ] **Step 2: Put keys in `.env.local`**
-
-From Project Settings → API, copy into `.env.local` (create it; it is gitignored):
+Run (answer "N" to generating VS Code settings if asked):
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-KEY
+npx --yes supabase init
+```
+This creates `supabase/config.toml`. The existing `supabase/migrations/0001_init.sql` is picked up automatically.
+
+- [ ] **Step 2: Create a seed (admin user via SQL is not portable; use a seed for the bucket + a known auth user)**
+
+Create `supabase/seed.sql` (runs automatically on `supabase start`/`db reset`):
+```sql
+-- Public bucket for product images
+insert into storage.buckets (id, name, public)
+values ('product-images', 'product-images', true)
+on conflict (id) do nothing;
+
+-- Seed admin user (local dev only): admin@corve.test / corve1234
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data)
+values ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+        'admin@corve.test', crypt('corve1234', gen_salt('bf')), now(), now(), now(),
+        '{"provider":"email","providers":["email"]}', '{}')
+on conflict do nothing;
 ```
 
-- [ ] **Step 3: Create the admin user (human)**
+- [ ] **Step 3: Start the stack**
 
-Authentication → Users → Add user → create one email/password user (the owner). Authentication → Providers: ensure Email is enabled and "Confirm email" is OFF (single internal user) or confirm the address.
+Run (first run pulls images; can take a few minutes):
+```bash
+npx --yes supabase start
+```
+It prints `API URL`, `anon key`, and `service_role key`. The migration and seed are applied automatically.
 
-- [ ] **Step 4: Create the storage bucket (human) and document it**
+- [ ] **Step 4: Put the local keys in `.env.local`**
 
-Storage → New bucket → name `product-images`, **Public** (catalog images are public). Create `supabase/storage.md`:
+Create `.env.local` (gitignored) with the printed values (defaults shown — confirm against the `supabase start` output):
+```bash
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key from supabase start>
+```
+
+- [ ] **Step 5: Document storage**
+
+Create `supabase/storage.md`:
 ```markdown
 # Storage
 
-Bucket `product-images` (public): holds product photos.
-Path convention: `products/<productId>/<sortOrder>-<filename>`.
-Public read; writes only via authenticated admin (Storage RLS default: authenticated insert).
+Bucket `product-images` (public): holds product photos. Created by `supabase/seed.sql`.
+Path convention: `products/<productId>/<epoch>-<filename>`.
+Public read; authenticated insert.
 ```
 
-- [ ] **Step 5: Verify connectivity**
+- [ ] **Step 6: Verify connectivity**
 
-With dev deps installed, run a one-off connectivity check (uses anon key; lists products, expect empty array, no error):
 ```bash
 node --env-file=.env.local -e "const{createClient}=require('@supabase/supabase-js');const c=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);c.from('products').select('id').then(r=>{if(r.error)throw r.error;console.log('OK rows:',r.data.length)})"
 ```
-Expected: `OK rows: 0`. If it errors, the schema/keys are wrong — fix before proceeding.
+Expected: `OK rows: 0`.
 
-- [ ] **Step 6: Commit the docs**
+- [ ] **Step 7: Commit config & docs**
 
 ```bash
-git add supabase/storage.md
-git commit -m "docs(db): document product-images storage bucket"
+git add supabase/config.toml supabase/seed.sql supabase/storage.md
+git commit -m "chore(db): local Supabase stack config, seed user and bucket"
 ```
+(`.env.local` is gitignored — do not commit it. The seed credentials are local-dev only.)
 
 ---
 
