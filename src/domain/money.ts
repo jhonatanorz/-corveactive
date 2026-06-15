@@ -25,7 +25,8 @@ export function parsePesosInput(input: string): Centavos | null {
   const cleaned = input.trim().replace(/[$,\s]/g, "");
   if (cleaned === "") return null;
   if (!/^\d+(\.\d+)?$/.test(cleaned)) return null;
-  const value = Number(cleaned);
-  if (!Number.isFinite(value)) return null;
-  return Math.round(value * 100);
+  const [whole, frac = ""] = cleaned.split(".");
+  const centavos = Number(whole) * 100 + Number((frac + "00").slice(0, 2));
+  const thirdDecimal = frac.charCodeAt(2) - 48; // digit at index 2, or NaN if absent
+  return thirdDecimal >= 5 ? centavos + 1 : centavos;
 }

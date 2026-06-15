@@ -51,4 +51,7 @@ describe("parsePesosInput", () => {
   it("rounds more than two decimals to the nearest centavo", () => {
     expect(parsePesosInput("10.005")).toBe(1001);
   });
+  it("rounds the third decimal up reliably (no float drift)", () => {
+    expect(parsePesosInput("1.005")).toBe(101);
+  });
 });
