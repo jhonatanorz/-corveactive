@@ -1,6 +1,9 @@
 -- CORVE schema v1
 
-create type line as enum ('MOVE', 'HIM');
+-- NOTE: the enum is named `product_line`, not `line`, because Postgres has a
+-- built-in geometric type `line` in pg_catalog that shadows an unqualified `line`
+-- (pg_catalog resolves first), which makes 'MOVE'/'HIM' values invalid.
+create type product_line as enum ('MOVE', 'HIM');
 create type product_status as enum ('draft', 'active', 'hidden');
 create type order_status as enum ('nuevo','confirmado','pagado','enviado','entregado','cancelado');
 create type po_status as enum ('borrador','pedida','parcial','recibida','cancelada');
@@ -9,7 +12,7 @@ create type movement_type as enum ('reabasto','pedido','correccion','cancelacion
 create table products (
   id          uuid primary key default gen_random_uuid(),
   name        text not null,
-  line        line not null,
+  line        product_line not null,
   type        text not null,
   description text not null default '',
   price       integer not null,            -- centavos
@@ -78,7 +81,7 @@ create table order_items (
   order_id     uuid not null references orders(id) on delete cascade,
   variant_id   uuid references variants(id) on delete set null,
   product_name text not null,  -- snapshot
-  line         line not null,  -- snapshot, for sales-by-line reporting
+  line         product_line not null,  -- snapshot, for sales-by-line reporting
   color        text not null,  -- snapshot
   size         text not null,  -- snapshot
   unit_price   integer not null, -- centavos snapshot
