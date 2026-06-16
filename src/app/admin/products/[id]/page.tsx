@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { getProduct } from "@/lib/repos/products";
-import { saveProduct, addVariant, correctVariant } from "./actions";
+import { getProduct, listImages } from "@/lib/repos/products";
+import { saveProduct, addVariant, correctVariant, uploadImage } from "./actions";
 import ProductForm from "./ProductForm";
 
 export default async function ProductEditorPage({
@@ -11,6 +11,7 @@ export default async function ProductEditorPage({
   const { id } = await params;
   const existing = id === "new" ? null : await getProduct(id);
   if (id !== "new" && !existing) notFound();
+  const images = id === "new" ? [] : await listImages(id);
 
   const action = saveProduct.bind(null, id);
   const variants = existing?.variants ?? [];
@@ -19,6 +20,16 @@ export default async function ProductEditorPage({
       <ProductForm product={existing?.product ?? null} action={action} />
       {id !== "new" && (
         <section className="max-w-md px-6 pb-8 text-sm">
+          <div className="flex gap-2 mb-3 flex-wrap">
+            {images.map((img) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={img.id} src={img.url} alt="" className="h-20 w-16 object-cover rounded" />
+            ))}
+          </div>
+          <form action={uploadImage.bind(null, id)} className="mb-4">
+            <input type="file" name="image" accept="image/*" className="text-xs" />
+            <button className="rounded bg-[#211d1a] text-white px-3 py-1 ml-2 text-xs">Subir foto</button>
+          </form>
           <h2 className="font-semibold mb-2">Variantes (color × talla)</h2>
           <ul className="space-y-1">
             {variants.map((v) => (

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { validateProductInput } from "@/lib/admin/product-input";
-import { createProduct, updateProduct, saveVariants } from "@/lib/repos/products";
+import { createProduct, updateProduct, saveVariants, addProductImage } from "@/lib/repos/products";
 import { correctStock } from "@/lib/repos/inventory";
 
 export async function saveProduct(
@@ -46,4 +46,11 @@ export async function correctVariant(productId: string, formData: FormData): Pro
   await correctStock(variantId, target, reason);
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/admin/inventory");
+}
+
+export async function uploadImage(productId: string, formData: FormData): Promise<void> {
+  const file = formData.get("image");
+  if (!(file instanceof File) || file.size === 0) return;
+  await addProductImage(productId, file);
+  revalidatePath(`/admin/products/${productId}`);
 }
