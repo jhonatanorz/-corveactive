@@ -42,7 +42,7 @@ begin
     from purchase_order_items where po_id = p_po_id;
 
   update purchase_orders
-    set status = case when coalesce(v_all_complete, false) then 'recibida' else 'parcial' end
+    set status = (case when coalesce(v_all_complete, false) then 'recibida' else 'parcial' end)::po_status
     where id = p_po_id;
 end;
 $$;
