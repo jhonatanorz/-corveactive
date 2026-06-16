@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { validateProductInput } from "@/lib/admin/product-input";
-import { createProduct, updateProduct, saveVariants, addProductImage } from "@/lib/repos/products";
+import { createProduct, updateProduct, saveVariants, addProductImage, deleteProductImage } from "@/lib/repos/products";
 import { correctStock } from "@/lib/repos/inventory";
 
 export async function saveProduct(
@@ -51,6 +51,18 @@ export async function correctVariant(productId: string, formData: FormData): Pro
 export async function uploadImage(productId: string, formData: FormData): Promise<void> {
   const file = formData.get("image");
   if (!(file instanceof File) || file.size === 0) return;
-  await addProductImage(productId, file);
+  const color = String(formData.get("color") ?? "").trim() || null;
+  await addProductImage(productId, file, color);
   revalidatePath(`/admin/products/${productId}`);
+  revalidatePath("/");
+  revalidatePath(`/producto/${productId}`);
+}
+
+export async function deleteImage(productId: string, formData: FormData): Promise<void> {
+  const imageId = String(formData.get("imageId") ?? "");
+  if (!imageId) return;
+  await deleteProductImage(imageId);
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath("/");
+  revalidatePath(`/producto/${productId}`);
 }

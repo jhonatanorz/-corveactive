@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProduct, listImages } from "@/lib/repos/products";
-import { saveProduct, addVariant, correctVariant, uploadImage } from "./actions";
+import { saveProduct, addVariant, correctVariant, uploadImage, deleteImage } from "./actions";
 import ProductForm from "./ProductForm";
 
 export default async function ProductEditorPage({
@@ -15,20 +15,32 @@ export default async function ProductEditorPage({
 
   const action = saveProduct.bind(null, id);
   const variants = existing?.variants ?? [];
+  const colors = [...new Set(variants.map((v) => v.color))];
   return (
     <div>
       <ProductForm product={existing?.product ?? null} action={action} />
       {id !== "new" && (
         <section className="max-w-md px-6 pb-8 text-sm">
-          <div className="flex gap-2 mb-3 flex-wrap">
+          <div className="flex gap-3 mb-3 flex-wrap">
             {images.map((img) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={img.id} src={img.url} alt="" className="h-20 w-16 object-cover rounded" />
+              <div key={img.id} className="text-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.url} alt="" className="h-20 w-16 object-cover rounded" />
+                <div className="text-[10px] text-[#6b5d50]">{img.color ?? "Default"}</div>
+                <form action={deleteImage.bind(null, id)}>
+                  <input type="hidden" name="imageId" value={img.id} />
+                  <button className="text-[10px] text-red-600">eliminar</button>
+                </form>
+              </div>
             ))}
           </div>
-          <form action={uploadImage.bind(null, id)} className="mb-4">
+          <form action={uploadImage.bind(null, id)} className="mb-4 flex gap-2 items-center">
             <input type="file" name="image" accept="image/*" className="text-xs" />
-            <button className="rounded bg-[#211d1a] text-white px-3 py-1 ml-2 text-xs">Subir foto</button>
+            <select name="color" className="text-xs rounded border border-[#d8cdc0] p-1">
+              <option value="">Default (todas)</option>
+              {colors.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <button className="rounded bg-[#211d1a] text-white px-3 py-1 text-xs">Subir foto</button>
           </form>
           <h2 className="font-semibold mb-2">Variantes (color × talla)</h2>
           <ul className="space-y-1">
