@@ -28,6 +28,7 @@ export interface ProductImageRow {
   product_id: string;
   url: string;
   sort_order: number;
+  color: string | null;
 }
 
 export interface StockMovementRow {
