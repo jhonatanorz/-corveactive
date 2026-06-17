@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand palette */
+  --periwinkle: #a0b5e7;
+  --periwinkle-2: #c3d0ee;
+  --mist: #eef1fb;
+  --lime: #ddf344;
+  --royal: #4849eb;
+  --royal-deep: #2f30c4;
+  --snow: #f5f9ff;
+  /* Ink */
+  --ink: #1a1b3a;
+  --ink-2: #4a4c6e;
+  --ink-3: #8487a4;
+  --ink-on-royal: #f5f9ff;
+  /* Border */
+  --line: rgba(26, 27, 58, 0.12);
+  --line-strong: rgba(26, 27, 58, 0.24);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-royal: var(--royal);
+  --color-royal-deep: var(--royal-deep);
+  --color-periwinkle: var(--periwinkle);
+  --color-periwinkle-2: var(--periwinkle-2);
+  --color-mist: var(--mist);
+  --color-lime: var(--lime);
+  --color-snow: var(--snow);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-on-royal: var(--ink-on-royal);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --radius-xl: 44px;
+  --radius-pill: 999px;
+
+  --shadow-1: 0 1px 2px rgba(26, 27, 58, 0.06), 0 2px 8px rgba(26, 27, 58, 0.04);
+  --shadow-2: 0 2px 4px rgba(26, 27, 58, 0.06), 0 12px 28px rgba(26, 27, 58, 0.08);
+  --shadow-bold: 0 8px 28px rgba(72, 73, 235, 0.22);
+
+  --font-display: var(--font-dream-avenue), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, Menlo, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@utility blob {
+  border-radius: 62% 38% 55% 45% / 50% 60% 40% 50%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: var(--ink);
+}
+
+::selection {
+  background: var(--lime);
+  color: var(--ink);
 }
