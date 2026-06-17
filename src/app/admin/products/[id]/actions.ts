@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { validateProductInput } from "@/lib/admin/product-input";
 import { createProduct, updateProduct, saveVariants, addProductImage, deleteProductImage } from "@/lib/repos/products";
-import { correctStock } from "@/lib/repos/inventory";
+import { adjustStockToTarget } from "@/lib/repos/inventory";
 
 export async function saveProduct(
   id: string,
@@ -42,8 +42,12 @@ export async function addVariant(productId: string, formData: FormData): Promise
 export async function correctVariant(productId: string, formData: FormData): Promise<void> {
   const variantId = String(formData.get("variantId") ?? "");
   const target = Number(formData.get("target") ?? NaN);
-  const reason = String(formData.get("reason") ?? "Corrección manual");
-  await correctStock(variantId, target, reason);
+  if (!variantId || !Number.isInteger(target) || target < 0) return;
+  const reason = String(formData.get("reason") ?? "").trim() || "Corrección manual";
+  const costRaw = String(formData.get("cost") ?? "").trim();
+  const { parsePesosInput } = await import("@/domain/money");
+  const unitCost = costRaw === "" ? null : parsePesosInput(costRaw);
+  await adjustStockToTarget(variantId, target, reason, unitCost);
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/admin/inventory");
 }
