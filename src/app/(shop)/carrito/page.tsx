@@ -7,7 +7,7 @@ import { useCart } from "@/lib/cart/CartContext";
 import { cartSubtotal } from "@/domain/cart";
 import { formatMXN } from "@/domain/money";
 import { validateCheckout } from "@/domain/checkout";
-import { Button, Card, inputClass } from "@/components/ui";
+import { Button, Card, inputClass, FloatingBar } from "@/components/ui";
 import { submitOrder } from "./actions";
 
 export default function CartPage() {
@@ -44,7 +44,8 @@ export default function CartPage() {
   }
 
   return (
-    <main className="p-4 max-w-md mx-auto">
+    <>
+    <main className="p-4 max-w-md mx-auto pb-28">
       <h1 className="text-xl font-semibold mb-3 text-ink">Tu pedido</h1>
       {items.length === 0 && <p className="text-ink-3">Tu carrito está vacío.</p>}
       <ul className="space-y-2">
@@ -76,12 +77,17 @@ export default function CartPage() {
             {errors.whatsapp && <p className="text-red-600 text-xs">{errors.whatsapp}</p>}
             <textarea placeholder="Nota / zona de entrega (opcional)" value={note} onChange={(e) => setNote(e.target.value)} className={inputClass} />
             {errors.cart && <p className="text-red-600 text-xs">{errors.cart}</p>}
-            <Button variant="primary" onClick={onSubmit} disabled={pending} className="w-full">
-              {pending ? "Enviando…" : "Enviar pedido"}
-            </Button>
           </div>
         </>
       )}
     </main>
+    {items.length > 0 && (
+      <FloatingBar>
+        <Button variant="primary" onClick={onSubmit} disabled={pending} className="w-full">
+          {pending ? "Enviando…" : "Enviar pedido"}
+        </Button>
+      </FloatingBar>
+    )}
+    </>
   );
 }

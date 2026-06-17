@@ -8,7 +8,7 @@ import { availableByColor, type AvailVariant } from "@/domain/availability";
 import { pickProductImage, type ImageChoice } from "@/domain/product-image";
 import type { ColorOption } from "@/domain/product-colors";
 import { formatMXN } from "@/domain/money";
-import { Button, Eyebrow, FadeImage } from "@/components/ui";
+import { Button, Eyebrow, FadeImage, FloatingBar } from "@/components/ui";
 
 interface VariantLite extends AvailVariant { id: string }
 
@@ -48,10 +48,10 @@ export default function ProductDetailClient({ productId, productName, price, lin
   }
 
   return (
-    <main className="md:flex md:gap-6 md:max-w-4xl md:mx-auto md:p-6">
+    <main className="md:flex md:gap-6 md:max-w-4xl md:mx-auto md:p-6 pb-28">
       {/* gallery */}
       <div className="md:w-1/2 md:flex md:gap-3">
-        <div className="order-1 md:order-2 relative aspect-[3/4] md:flex-1 md:self-start bg-mist overflow-hidden rounded-lg">
+        <div className="order-1 md:order-2 relative aspect-[3/4] md:flex-1 md:self-start bg-mist overflow-hidden">
           <FadeImage src={activeUrl} alt={productName} sizes="(min-width:768px) 40vw, 100vw" />
         </div>
         {images.length > 1 && (
@@ -101,16 +101,18 @@ export default function ProductDetailClient({ productId, productName, price, lin
               </button>
             ))}
           </div>
-          <Button variant="primary" disabled={!chosen} className="w-full"
-            onClick={() => {
-              if (!chosen) return;
-              add({ variantId: chosen.id, productId, productName, color, size, unitPrice: price, qty: 1, image: pickProductImage(images, color) });
-              router.push("/carrito");
-            }}>
-            Agregar · {formatMXN(price)}
-          </Button>
         </div>
       </div>
+      <FloatingBar>
+        <Button variant="primary" disabled={!chosen} className="w-full"
+          onClick={() => {
+            if (!chosen) return;
+            add({ variantId: chosen.id, productId, productName, color, size, unitPrice: price, qty: 1, image: pickProductImage(images, color) });
+            router.push("/carrito");
+          }}>
+          Agregar · {formatMXN(price)}
+        </Button>
+      </FloatingBar>
     </main>
   );
 }

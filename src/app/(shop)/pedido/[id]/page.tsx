@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import { buildWhatsAppLink } from "@/domain/whatsapp";
 import { formatMXN } from "@/domain/money";
-import { Card, buttonClass } from "@/components/ui";
+import { Card, buttonClass, FloatingBar } from "@/components/ui";
 
 // The store's WhatsApp number — replace with the real one at deploy time.
 const STORE_WHATSAPP = "5215500000000";
@@ -37,11 +37,15 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
   if (!order) {
     const wa = buildWhatsAppLink(STORE_WHATSAPP, `Hola CORVE, mi pedido #${short}`);
     return (
-      <main className="p-6 max-w-md mx-auto text-center">
+      <>
+      <main className="p-6 max-w-md mx-auto text-center pb-28">
         <h1 className="text-2xl font-bold mb-2 text-ink">¡Pedido recibido!</h1>
         <p className="text-ink-2 text-sm mb-4">Tu pedido #{short} fue recibido. Te contactamos por WhatsApp.</p>
-        <a href={wa} target="_blank" rel="noopener noreferrer" className={buttonClass("primary", "lg")}>Continuar por WhatsApp</a>
       </main>
+      <FloatingBar>
+        <a href={wa} target="_blank" rel="noopener noreferrer" className={`${buttonClass("primary", "lg")} w-full`}>Continuar por WhatsApp</a>
+      </FloatingBar>
+      </>
     );
   }
 
@@ -50,7 +54,8 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
   const wa = buildWhatsAppLink(STORE_WHATSAPP, message);
 
   return (
-    <main className="p-6 max-w-md mx-auto text-center">
+    <>
+    <main className="p-6 max-w-md mx-auto text-center pb-28">
       <h1 className="text-2xl font-bold mb-2 text-ink">¡Gracias, {order.name}!</h1>
       <p className="text-ink-2 text-sm mb-4">Tu pedido #{short} fue recibido. Te contactamos por WhatsApp para confirmar pago y envío.</p>
       <Card className="p-4 mb-5 text-left">
@@ -67,7 +72,10 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
         </ul>
         <div className="flex justify-between text-sm pt-2 text-ink"><span>Total</span><span>{formatMXN(order.total)} MXN</span></div>
       </Card>
-      <a href={wa} target="_blank" rel="noopener noreferrer" className={buttonClass("primary", "lg")}>Continuar por WhatsApp</a>
     </main>
+    <FloatingBar>
+      <a href={wa} target="_blank" rel="noopener noreferrer" className={`${buttonClass("primary", "lg")} w-full`}>Continuar por WhatsApp</a>
+    </FloatingBar>
+    </>
   );
 }

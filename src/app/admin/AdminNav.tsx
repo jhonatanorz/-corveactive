@@ -20,7 +20,7 @@ export default function AdminNav() {
   return (
     <>
       {/* Mobile top bar */}
-      <header className="md:hidden flex items-center justify-between p-4 border-b border-line bg-snow">
+      <header className="md:hidden sticky top-0 z-30 flex items-center justify-between p-4 border-b border-line bg-snow">
         <button type="button" aria-label="Abrir menú" onClick={() => setOpen(true)} className="text-ink">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -37,7 +37,7 @@ export default function AdminNav() {
 
       {/* Sidebar (desktop) / drawer (mobile) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-60 bg-mist text-ink-2 p-4 text-sm flex flex-col border-r border-line transition-transform duration-200 ease-out md:static md:z-auto md:w-44 md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-40 w-60 bg-mist text-ink-2 p-4 text-sm flex flex-col border-r border-line transition-transform duration-200 ease-out md:sticky md:top-0 md:h-screen md:z-auto md:w-44 md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="flex items-center justify-between md:block">
           <Wordmark href="/admin/pedidos" className="text-xl pb-4" />
