@@ -1,23 +1,24 @@
 import { listSuppliers } from "@/lib/repos/suppliers";
 import { addSupplier } from "./actions";
+import { Button, inputClass } from "@/components/ui";
 
 export default async function ProveedoresPage() {
   const suppliers = await listSuppliers();
   return (
     <div className="p-6 max-w-lg text-sm">
-      <h1 className="text-lg font-bold mb-4">Proveedores</h1>
+      <h1 className="text-lg font-bold mb-4 text-ink">Proveedores</h1>
       <ul className="mb-4">
         {suppliers.map((s) => (
-          <li key={s.id} className="flex justify-between border-b border-[#f3efe9] py-1">
-            <span>{s.name}</span><span className="opacity-60">{s.contact}</span>
+          <li key={s.id} className="flex justify-between border-b border-line py-1 text-ink">
+            <span>{s.name}</span><span className="text-ink-3">{s.contact}</span>
           </li>
         ))}
-        {suppliers.length === 0 && <li className="text-[#9a8b7d]">Sin proveedores aún.</li>}
+        {suppliers.length === 0 && <li className="text-ink-3">Sin proveedores aún.</li>}
       </ul>
       <form action={addSupplier} className="flex gap-2">
-        <input name="name" placeholder="Nombre" className="flex-1 rounded border border-[#d8cdc0] p-2" />
-        <input name="contact" placeholder="Contacto" className="flex-1 rounded border border-[#d8cdc0] p-2" />
-        <button className="rounded bg-[#211d1a] text-white px-3">Agregar</button>
+        <input name="name" placeholder="Nombre" className="flex-1 rounded-sm border border-line bg-white p-2 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-royal/40" />
+        <input name="contact" placeholder="Contacto" className="flex-1 rounded-sm border border-line bg-white p-2 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-royal/40" />
+        <Button type="submit" variant="primary">+ Proveedor</Button>
       </form>
     </div>
   );
