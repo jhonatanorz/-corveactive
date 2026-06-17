@@ -1,9 +1,7 @@
-import Link from "next/link";
-import Image from "next/image";
 import { listActiveByLine } from "@/lib/repos/catalog";
-import { formatMXN } from "@/domain/money";
-import { pickProductImage } from "@/domain/product-image";
-import { Card, Eyebrow, Blob } from "@/components/ui";
+import { productColors } from "@/domain/product-colors";
+import { Eyebrow, Blob } from "@/components/ui";
+import ProductCard from "./ProductCard";
 import type { Line } from "@/domain/types";
 
 const LINES: { line: Line; title: string; message: string }[] = [
@@ -30,15 +28,16 @@ export default async function CatalogPage() {
           </div>
           <div className="grid grid-cols-2 gap-3 p-4">
             {s.products.map((p) => {
-              const url = pickProductImage(p.product_images.map((i) => ({ url: i.url, color: i.color })), null);
+              const imgs = p.product_images.map((i) => ({ url: i.url, color: i.color }));
               return (
-                <Link key={p.id} href={`/producto/${p.id}`} className="block">
-                  <Card className="relative h-44 overflow-hidden bg-mist">
-                    {url && <Image src={url} alt={p.name} fill sizes="50vw" className="object-cover" />}
-                  </Card>
-                  <div className="text-sm mt-2 text-ink">{p.name}</div>
-                  <div className="text-sm text-ink-2">{formatMXN(p.price)}</div>
-                </Link>
+                <ProductCard
+                  key={p.id}
+                  id={p.id}
+                  name={p.name}
+                  price={p.price}
+                  images={imgs}
+                  colors={productColors(p.variants, imgs)}
+                />
               );
             })}
             {s.products.length === 0 && <p className="text-ink-3 text-sm">Pronto.</p>}
