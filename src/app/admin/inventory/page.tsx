@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { listMovements } from "@/lib/repos/inventory";
-import { Eyebrow } from "@/components/ui";
+import { listMovements, totalInventoryValue } from "@/lib/repos/inventory";
+import { formatMXN } from "@/domain/money";
+import { Card, Eyebrow } from "@/components/ui";
 import type { VariantRow } from "@/lib/db-types";
 
 export default async function InventoryPage() {
@@ -9,10 +10,17 @@ export default async function InventoryPage() {
     .from("variants").select("*, products(name)").order("stock", { ascending: true });
   if (error) throw error;
   const movements = await listMovements(50);
+  const invValue = await totalInventoryValue();
   const rows = (variants ?? []) as (VariantRow & { products: { name: string } | null })[];
 
   return (
     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+      <div className="md:col-span-2">
+        <Card>
+          <Eyebrow>Valor de inventario</Eyebrow>
+          <div className="text-2xl font-bold text-ink">{formatMXN(invValue)}</div>
+        </Card>
+      </div>
       <div>
         <h1 className="text-lg font-bold mb-3 text-ink">Inventario</h1>
         <div className="overflow-x-auto">

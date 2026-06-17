@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
 import { getProduct, listImages } from "@/lib/repos/products";
+import { listVariantLots } from "@/lib/repos/inventory";
+import { currentCost } from "@/domain/inventory";
+import { calcMargin } from "@/domain/margin";
+import { formatMXN } from "@/domain/money";
 import { saveProduct, addVariant, correctVariant, uploadImage, deleteImage } from "./actions";
 import ProductForm from "./ProductForm";
 import { Button, Eyebrow, inputClass } from "@/components/ui";
@@ -17,6 +21,8 @@ export default async function ProductEditorPage({
   const action = saveProduct.bind(null, id);
   const variants = existing?.variants ?? [];
   const colors = [...new Set(variants.map((v) => v.color))];
+  const lots = id === "new" ? {} : await listVariantLots(id);
+  const price = existing?.product.price ?? 0;
   return (
     <div>
       <ProductForm product={existing?.product ?? null} action={action} />
@@ -54,11 +60,19 @@ export default async function ProductEditorPage({
               <li key={v.id} className="flex flex-wrap items-center gap-2">
                 <span className="flex-1 text-ink">{v.color} · {v.size}</span>
                 <span className="text-ink-2">stock {v.stock}</span>
+                {(() => {
+                  const cc = currentCost(lots[v.id] ?? []);
+                  if (cc === null) return <span className="text-ink-3">sin costo</span>;
+                  const m = calcMargin(price, cc);
+                  return <span className="text-ink-3">costo {formatMXN(cc)} · margen {m.pct}%</span>;
+                })()}
                 <form action={correctVariant.bind(null, id)} className="flex gap-1">
                   <input type="hidden" name="variantId" value={v.id} />
                   <input name="target" type="number" min="0" defaultValue={v.stock}
                     className="w-16 rounded-sm border border-line bg-white p-1 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-royal/40" />
                   <input name="reason" placeholder="motivo"
+                    className="w-24 rounded-sm border border-line bg-white p-1 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-royal/40" />
+                  <input name="cost" type="text" inputMode="decimal" placeholder="costo (si sube)"
                     className="w-24 rounded-sm border border-line bg-white p-1 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-royal/40" />
                   <Button type="submit" variant="ghost" size="sm">Corregir</Button>
                 </form>

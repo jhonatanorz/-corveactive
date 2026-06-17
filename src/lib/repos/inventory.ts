@@ -46,6 +46,17 @@ export async function listVariantLots(productId: string): Promise<Record<string,
   return out;
 }
 
+/** Total value of all on-hand inventory (centavos), summed across every lot. */
+export async function totalInventoryValue(): Promise<number> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("inventory_lots").select("qty_remaining,unit_cost");
+  if (error) throw error;
+  return (data ?? []).reduce(
+    (s, l) => s + (l as { qty_remaining: number; unit_cost: number }).qty_remaining * (l as { qty_remaining: number; unit_cost: number }).unit_cost,
+    0,
+  );
+}
+
 export async function listMovements(limit = 100): Promise<StockMovementRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
