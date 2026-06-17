@@ -19,7 +19,6 @@ export default async function CatalogPage() {
         <section key={s.line} className="mb-10">
           <div className="relative h-[60vh] flex flex-col justify-end p-6 overflow-hidden bg-royal text-ink-on-royal">
             <Blob fill="periwinkle" className="absolute -top-16 -right-10 w-72 h-72 opacity-80" />
-            <Blob fill="lime" className="absolute -bottom-20 -left-10 w-64 h-64 opacity-90 mix-blend-screen" />
             <div className="relative">
               <Eyebrow className="text-periwinkle-2 mb-2">CORVE {s.line}</Eyebrow>
               <h2 className="font-display text-5xl leading-none text-lime">{s.title}</h2>
