@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart/CartContext";
 import { cartSubtotal } from "@/domain/cart";
@@ -35,7 +36,7 @@ export default function CartPage() {
     }
     sessionStorage.setItem("corve-last-order", JSON.stringify({
       id: res.id, name,
-      items: items.map((i) => ({ productName: i.productName, color: i.color, size: i.size, qty: i.qty, unitPrice: i.unitPrice })),
+      items: items.map((i) => ({ productName: i.productName, color: i.color, size: i.size, qty: i.qty, unitPrice: i.unitPrice, image: i.image })),
       total: subtotal,
     }));
     clear();
@@ -49,6 +50,9 @@ export default function CartPage() {
       <ul className="space-y-2">
         {items.map((i) => (
           <Card key={i.variantId} className="flex items-center gap-2 text-sm p-3">
+            <div className="relative w-12 h-14 shrink-0 rounded-md overflow-hidden bg-mist">
+              {i.image && <Image src={i.image} alt={i.productName} fill sizes="48px" className="object-cover" />}
+            </div>
             <div className="flex-1">
               <div className="text-ink">{i.productName}</div>
               <div className="text-ink-3">{i.color} · {i.size}</div>

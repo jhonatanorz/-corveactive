@@ -104,7 +104,7 @@ export default function ProductDetailClient({ productId, productName, price, lin
           <Button variant="primary" disabled={!chosen} className="w-full"
             onClick={() => {
               if (!chosen) return;
-              add({ variantId: chosen.id, productId, productName, color, size, unitPrice: price, qty: 1 });
+              add({ variantId: chosen.id, productId, productName, color, size, unitPrice: price, qty: 1, image: pickProductImage(images, color) });
               router.push("/carrito");
             }}>
             Agregar · {formatMXN(price)}

@@ -6,4 +6,5 @@ export interface CartItem {
   size: string;
   unitPrice: number; // centavos
   qty: number;
+  image?: string | null;
 }

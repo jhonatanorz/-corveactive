@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import Image from "next/image";
 import { buildWhatsAppLink } from "@/domain/whatsapp";
 import { formatMXN } from "@/domain/money";
 import { Card, buttonClass } from "@/components/ui";
@@ -11,7 +12,7 @@ const STORE_WHATSAPP = "5215500000000";
 interface LastOrder {
   id: string;
   name: string;
-  items: { productName: string; color: string; size: string; qty: number; unitPrice: number }[];
+  items: { productName: string; color: string; size: string; qty: number; unitPrice: number; image?: string | null }[];
   total: number;
 }
 
@@ -55,8 +56,11 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
       <Card className="p-4 mb-5 text-left">
         <ul>
           {order.items.map((i, idx) => (
-            <li key={idx} className="flex justify-between border-b border-line py-1 text-sm">
-              <span className="text-ink">{i.productName} · {i.color}/{i.size} ×{i.qty}</span>
+            <li key={idx} className="flex items-center gap-2 border-b border-line py-2 text-sm">
+              <div className="relative w-10 h-12 shrink-0 rounded-md overflow-hidden bg-mist">
+                {i.image && <Image src={i.image} alt={i.productName} fill sizes="40px" className="object-cover" />}
+              </div>
+              <span className="flex-1 text-ink">{i.productName} · {i.color}/{i.size} ×{i.qty}</span>
               <span className="text-ink">{formatMXN(i.unitPrice * i.qty)}</span>
             </li>
           ))}
