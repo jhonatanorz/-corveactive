@@ -26,7 +26,7 @@ export default async function CatalogPage() {
               <p className="italic opacity-80 mt-2">{s.message}</p>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 p-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 p-4">
             {s.products.map((p) => {
               const imgs = p.product_images.map((i) => ({ url: i.url, color: i.color }));
               return (

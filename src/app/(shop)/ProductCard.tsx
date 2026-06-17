@@ -22,8 +22,8 @@ export default function ProductCard({ id, name, price, images, colors }: Props) 
   return (
     <div>
       <Link href={`/producto/${id}`} className="block">
-        <Card className="relative h-44 overflow-hidden bg-mist">
-          <FadeImage src={url} alt={name} sizes="50vw" />
+        <Card className="relative aspect-[3/4] overflow-hidden bg-mist">
+          <FadeImage src={url} alt={name} sizes="(min-width:1024px) 25vw, (min-width:768px) 33vw, 50vw" />
         </Card>
       </Link>
       {colors.length > 0 && (
