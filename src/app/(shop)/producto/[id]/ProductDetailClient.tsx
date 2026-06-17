@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart/CartContext";
 import { availableByColor, type AvailVariant } from "@/domain/availability";
 import { pickProductImage, type ImageChoice } from "@/domain/product-image";
 import { formatMXN } from "@/domain/money";
+import { Button, Eyebrow } from "@/components/ui";
 
 interface VariantLite extends AvailVariant { id: string }
 
@@ -33,42 +34,41 @@ export default function ProductDetailClient({ productId, productName, price, lin
 
   return (
     <main>
-      <div className="relative h-72 bg-gradient-to-br from-[#d8c1ad] to-[#9a7a61]">
+      <div className="relative h-72 bg-mist">
         {heroUrl && <Image src={heroUrl} alt={productName} fill sizes="100vw" className="object-cover" />}
       </div>
       <div className="p-4">
-        <h1 className="text-2xl font-bold">{productName}</h1>
-        <div className="opacity-70 mb-2">{formatMXN(price)} · CORVE {line}</div>
-        {description && <p className="italic text-sm opacity-80">{description}</p>}
+        <h1 className="text-2xl font-semibold text-ink">{productName}</h1>
+        <div className="text-ink-2 mb-2">{formatMXN(price)} · CORVE {line}</div>
+        {description && <p className="italic text-sm text-ink-2">{description}</p>}
       </div>
       <div className="p-4 space-y-3">
-        <div className="text-xs uppercase tracking-wider opacity-60">Color</div>
+        <Eyebrow>Color</Eyebrow>
         <div className="flex gap-2">
           {colors.map((c) => (
             <button key={c.color} onClick={() => { setColor(c.color); setSize(""); }}
-              className={`px-3 py-1 rounded border text-sm ${c.color === color ? "bg-white text-[#161311]" : "border-white/40"}`}>
+              className={`px-3 py-1 rounded-pill border text-sm transition ${c.color === color ? "bg-periwinkle-2 text-royal border-transparent" : "border-line-strong text-ink"}`}>
               {c.color}
             </button>
           ))}
         </div>
-        <div className="text-xs uppercase tracking-wider opacity-60">Talla</div>
+        <Eyebrow>Talla</Eyebrow>
         <div className="flex gap-2">
           {sizes.map((s) => (
             <button key={s.size} disabled={!s.inStock} onClick={() => setSize(s.size)}
-              className={`px-3 py-1 rounded border text-sm ${s.size === size ? "bg-white text-[#161311]" : "border-white/40"} ${!s.inStock ? "opacity-30 line-through" : ""}`}>
+              className={`px-3 py-1 rounded-pill border text-sm transition ${s.size === size ? "bg-periwinkle-2 text-royal border-transparent" : "border-line-strong text-ink"} ${!s.inStock ? "opacity-30 line-through" : ""}`}>
               {s.size}
             </button>
           ))}
         </div>
-        <button disabled={!chosen}
+        <Button variant="primary" disabled={!chosen} className="w-full"
           onClick={() => {
             if (!chosen) return;
             add({ variantId: chosen.id, productId, productName, color, size, unitPrice: price, qty: 1 });
             router.push("/carrito");
-          }}
-          className="w-full rounded-xl bg-white text-[#161311] py-3 text-sm disabled:opacity-40">
+          }}>
           Agregar · {formatMXN(price)}
-        </button>
+        </Button>
       </div>
     </main>
   );

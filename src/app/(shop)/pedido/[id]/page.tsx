@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { buildWhatsAppLink } from "@/domain/whatsapp";
 import { formatMXN } from "@/domain/money";
+import { Card, buttonClass } from "@/components/ui";
 
 // The store's WhatsApp number — replace with the real one at deploy time.
 const STORE_WHATSAPP = "5215500000000";
@@ -36,9 +37,9 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
     const wa = buildWhatsAppLink(STORE_WHATSAPP, `Hola CORVE, mi pedido #${short}`);
     return (
       <main className="p-6 max-w-md mx-auto text-center">
-        <h1 className="text-2xl font-bold mb-2">¡Pedido recibido!</h1>
-        <p className="opacity-70 text-sm mb-4">Tu pedido #{short} fue recibido. Te contactamos por WhatsApp.</p>
-        <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-block rounded-xl bg-[#25D366] text-white px-5 py-3 text-sm">Continuar por WhatsApp</a>
+        <h1 className="text-2xl font-bold mb-2 text-ink">¡Pedido recibido!</h1>
+        <p className="text-ink-2 text-sm mb-4">Tu pedido #{short} fue recibido. Te contactamos por WhatsApp.</p>
+        <a href={wa} target="_blank" rel="noopener noreferrer" className={buttonClass("primary", "lg")}>Continuar por WhatsApp</a>
       </main>
     );
   }
@@ -49,18 +50,20 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
 
   return (
     <main className="p-6 max-w-md mx-auto text-center">
-      <h1 className="text-2xl font-bold mb-2">¡Gracias, {order.name}!</h1>
-      <p className="opacity-70 text-sm mb-4">Tu pedido #{short} fue recibido. Te contactamos por WhatsApp para confirmar pago y envío.</p>
-      <ul className="text-sm text-left mb-4">
-        {order.items.map((i, idx) => (
-          <li key={idx} className="flex justify-between border-b border-white/10 py-1">
-            <span>{i.productName} · {i.color}/{i.size} ×{i.qty}</span>
-            <span>{formatMXN(i.unitPrice * i.qty)}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="flex justify-between text-sm mb-5"><span>Total</span><span>{formatMXN(order.total)} MXN</span></div>
-      <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-block rounded-xl bg-[#25D366] text-white px-5 py-3 text-sm">Continuar por WhatsApp</a>
+      <h1 className="text-2xl font-bold mb-2 text-ink">¡Gracias, {order.name}!</h1>
+      <p className="text-ink-2 text-sm mb-4">Tu pedido #{short} fue recibido. Te contactamos por WhatsApp para confirmar pago y envío.</p>
+      <Card className="p-4 mb-5 text-left">
+        <ul>
+          {order.items.map((i, idx) => (
+            <li key={idx} className="flex justify-between border-b border-line py-1 text-sm">
+              <span className="text-ink">{i.productName} · {i.color}/{i.size} ×{i.qty}</span>
+              <span className="text-ink">{formatMXN(i.unitPrice * i.qty)}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="flex justify-between text-sm pt-2 text-ink"><span>Total</span><span>{formatMXN(order.total)} MXN</span></div>
+      </Card>
+      <a href={wa} target="_blank" rel="noopener noreferrer" className={buttonClass("primary", "lg")}>Continuar por WhatsApp</a>
     </main>
   );
 }
