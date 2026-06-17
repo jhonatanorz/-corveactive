@@ -7,17 +7,21 @@ export interface CatalogProduct extends ProductRow {
   product_images: ProductImageRow[];
 }
 
-/** Active products for a line, with their images (anon-readable via RLS). */
-export async function listActiveByLine(line: Line): Promise<CatalogProduct[]> {
+export interface CatalogListProduct extends CatalogProduct {
+  variants: { color: string; color_hex: string }[];
+}
+
+/** Active products for a line, with images + variant colors (anon-readable via RLS). */
+export async function listActiveByLine(line: Line): Promise<CatalogListProduct[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*, product_images(*)")
+    .select("*, product_images(*), variants(color,color_hex)")
     .eq("status", "active")
     .eq("line", line)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as CatalogProduct[];
+  return (data ?? []) as CatalogListProduct[];
 }
 
 export interface ProductDetail {
