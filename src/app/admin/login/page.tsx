@@ -1,25 +1,26 @@
 "use client";
 
 import { useActionState } from "react";
+import { Button, Card, Wordmark, inputClass, Blob } from "@/components/ui";
 import { signIn } from "./actions";
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(signIn, undefined);
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#fbf8f4] text-[#211d1a]">
-      <form action={formAction} className="w-80 space-y-3 p-6">
-        <h1 className="tracking-[0.28em] text-center text-lg">C O R V E</h1>
-        <p className="text-center text-sm text-[#8a7d70]">Panel de administración</p>
-        <input name="email" type="email" required placeholder="Correo"
-          className="w-full rounded-lg border border-[#d8cdc0] p-3 text-sm" />
-        <input name="password" type="password" required placeholder="Contraseña"
-          className="w-full rounded-lg border border-[#d8cdc0] p-3 text-sm" />
-        {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-        <button type="submit" disabled={pending}
-          className="w-full rounded-lg bg-[#211d1a] p-3 text-sm text-white disabled:opacity-60">
-          {pending ? "Entrando…" : "Entrar"}
-        </button>
-      </form>
+    <main className="min-h-screen flex items-center justify-center bg-snow text-ink relative overflow-hidden">
+      <Blob fill="periwinkle" className="absolute -top-24 -left-16 w-80 h-80 opacity-50" />
+      <Card className="w-80 p-6 relative">
+        <form action={formAction} className="space-y-3">
+          <Wordmark href="/admin/pedidos" className="block text-center text-2xl" />
+          <p className="text-center text-sm text-ink-3">Panel de administración</p>
+          <input name="email" type="email" required placeholder="Correo" className={inputClass} />
+          <input name="password" type="password" required placeholder="Contraseña" className={inputClass} />
+          {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+          <Button type="submit" variant="primary" disabled={pending} className="w-full">
+            {pending ? "Entrando…" : "Entrar"}
+          </Button>
+        </form>
+      </Card>
     </main>
   );
 }
