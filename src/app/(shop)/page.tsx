@@ -13,7 +13,7 @@ export default async function CatalogPage() {
   return (
     <CatalogBrowser
       items={items}
-      lines={lines.map((l) => ({ slug: l.slug, hero_title: l.hero_title, hero_message: l.hero_message }))}
+      lines={lines.map((l) => ({ slug: l.slug, name: l.name, hero_title: l.hero_title, hero_message: l.hero_message }))}
       categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
       showSections
     />

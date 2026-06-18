@@ -37,7 +37,7 @@ export default function CatalogSideMenu({ lines, categories, activeCats, onToggl
                 <li key={l.slug}>
                   <Link href={`/linea/${l.slug}`} onClick={onClose}
                     className="block rounded-md px-3 py-2 text-ink-2 transition-colors hover:bg-mist hover:text-ink">
-                    CORVE {l.slug}
+                    {l.name}
                   </Link>
                 </li>
               ))}

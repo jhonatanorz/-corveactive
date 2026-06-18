@@ -24,7 +24,7 @@ export default async function VentasPage({ searchParams }: { searchParams: Promi
           {lines.map((l) => (
             <Link key={l.slug} href={link({ line: l.slug })}
               className={`${buttonClass("primary", "sm")} ${sp.line === l.slug ? "" : "opacity-50"} rounded-pill`}>
-              {l.slug}
+              {l.slug.toUpperCase()}
             </Link>
           ))}
         </div>

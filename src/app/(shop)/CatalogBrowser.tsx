@@ -14,6 +14,7 @@ import type { CatalogItem } from "@/lib/repos/catalog";
 
 export interface BrowserLine {
   slug: string;
+  name: string;
   hero_title: string;
   hero_message: string;
 }

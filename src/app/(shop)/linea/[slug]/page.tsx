@@ -17,14 +17,14 @@ export default async function LinePage({ params }: { params: Promise<{ slug: str
     listActiveCatalogByLine(line.id),
   ]);
 
-  const heroLine = { slug: line.slug, hero_title: line.hero_title, hero_message: line.hero_message };
+  const heroLine = { slug: line.slug, name: line.name, hero_title: line.hero_title, hero_message: line.hero_message };
 
   return (
     <>
       <LineHero line={heroLine} />
       <CatalogBrowser
         items={items}
-        lines={lines.map((l) => ({ slug: l.slug, hero_title: l.hero_title, hero_message: l.hero_message }))}
+        lines={lines.map((l) => ({ slug: l.slug, name: l.name, hero_title: l.hero_title, hero_message: l.hero_message }))}
         categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
         showSections={false}
       />
