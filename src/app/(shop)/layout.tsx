@@ -1,17 +1,21 @@
+// src/app/(shop)/layout.tsx
 import { CartProvider } from "@/lib/cart/CartContext";
-import { Wordmark } from "@/components/ui";
-import CartPill from "./CartPill";
+import { listActiveLines } from "@/lib/repos/lines";
+import { listCategories } from "@/lib/repos/categories";
+import ShopChrome from "./ShopChrome";
 import Footer from "./Footer";
 
-export default function ShopLayout({ children }: { children: React.ReactNode }) {
+export default async function ShopLayout({ children }: { children: React.ReactNode }) {
+  const [lines, categories] = await Promise.all([listActiveLines(), listCategories()]);
   return (
     <CartProvider>
       <div className="min-h-screen bg-white text-ink">
-        <header className="sticky top-0 z-40 flex items-center justify-between px-5 py-4 border-b border-line bg-white/95 backdrop-blur">
-          <Wordmark className="text-2xl" />
-          <CartPill />
-        </header>
-        {children}
+        <ShopChrome
+          lines={lines.map((l) => ({ slug: l.slug, name: l.name, hero_title: l.hero_title, hero_message: l.hero_message }))}
+          categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+        >
+          {children}
+        </ShopChrome>
         <Footer />
       </div>
     </CartProvider>
