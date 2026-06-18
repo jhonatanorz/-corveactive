@@ -1,13 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { SUPABASE_URL, SUPABASE_KEY } from "./env";
 
 /** Refresh the Supabase auth session and gate /admin behind a logged-in user. */
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL,
+    SUPABASE_KEY,
     {
       cookies: {
         getAll() {
