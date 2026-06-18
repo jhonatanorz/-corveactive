@@ -16,3 +16,4 @@ export { Wordmark } from "./Wordmark";
 export { Field, inputClass } from "./Field";
 export { FadeImage } from "./FadeImage";
 export { FloatingBar } from "./FloatingBar";
+export { BottomSheet } from "./BottomSheet";
