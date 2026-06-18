@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/admin/compras", label: "Compras" },
   { href: "/admin/ventas", label: "Ventas" },
   { href: "/admin/proveedores", label: "Proveedores" },
+  { href: "/admin/ajustes", label: "Ajustes" },
 ];
 
 export default function AdminNav() {
