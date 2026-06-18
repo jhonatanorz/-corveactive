@@ -1,8 +1,9 @@
 // src/app/(shop)/linea/[slug]/page.tsx
 import { notFound } from "next/navigation";
-import { getActiveLineBySlug, listActiveLines } from "@/lib/repos/lines";
+import { getActiveLineBySlug } from "@/lib/repos/lines";
+import { listCategories } from "@/lib/repos/categories";
 import { listActiveCatalogByLine } from "@/lib/repos/catalog";
-import CatalogBrowser from "../../CatalogBrowser";
+import ProductBrowser from "../../ProductBrowser";
 import LineHero from "../../LineHero";
 
 export default async function LinePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -10,8 +11,8 @@ export default async function LinePage({ params }: { params: Promise<{ slug: str
   const line = await getActiveLineBySlug(slug);
   if (!line) notFound();
 
-  const [lines, items] = await Promise.all([
-    listActiveLines(),
+  const [categories, items] = await Promise.all([
+    listCategories(),
     listActiveCatalogByLine(line.id),
   ]);
 
@@ -20,11 +21,13 @@ export default async function LinePage({ params }: { params: Promise<{ slug: str
   return (
     <>
       <LineHero line={heroLine} />
-      <CatalogBrowser
-        items={items}
-        lines={lines.map((l) => ({ slug: l.slug, name: l.name, hero_title: l.hero_title, hero_message: l.hero_message }))}
-        showSections={false}
-      />
+      <main className="min-w-0">
+        <ProductBrowser
+          items={items}
+          facets={["category", "color"]}
+          categoryOptions={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+        />
+      </main>
     </>
   );
 }
