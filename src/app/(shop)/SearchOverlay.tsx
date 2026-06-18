@@ -15,6 +15,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const seqRef = useRef(0);
 
   // focus on open; reset on close
   useEffect(() => {
@@ -35,11 +36,12 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
       abortRef.current?.abort();
       const ac = new AbortController();
       abortRef.current = ac;
+      const seq = ++seqRef.current;
       fetch(`/api/search?q=${encodeURIComponent(term)}`, { signal: ac.signal })
         .then((r) => r.json())
-        .then((d) => setItems(d.items ?? []))
-        .catch((e) => { if ((e as Error).name !== "AbortError") setItems([]); })
-        .finally(() => setLoading(false));
+        .then((d) => { if (seq === seqRef.current) setItems(d.items ?? []); })
+        .catch((e) => { if ((e as Error).name !== "AbortError" && seq === seqRef.current) setItems([]); })
+        .finally(() => { if (seq === seqRef.current) setLoading(false); });
     }, 250);
     return () => clearTimeout(t);
   }, [q]);

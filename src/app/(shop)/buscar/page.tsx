@@ -15,6 +15,7 @@ export default async function BuscarPage({
   ]);
   return (
     <SearchResults
+      key={query}
       query={query}
       items={items}
       lines={lines.map((l) => ({ slug: l.slug, name: l.name }))}
