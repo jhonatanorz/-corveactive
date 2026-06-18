@@ -12,6 +12,7 @@ export { KpiCard } from "./KpiCard";
 export { Thumb } from "./Thumb";
 export { ImageUploader } from "./ImageUploader";
 export { Blob } from "./Blob";
+export { Isotype } from "./Isotype";
 export { Wordmark } from "./Wordmark";
 export { Field, inputClass } from "./Field";
 export { FadeImage } from "./FadeImage";

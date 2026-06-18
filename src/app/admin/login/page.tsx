@@ -1,14 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button, Card, Wordmark, inputClass, Blob } from "@/components/ui";
+import { Button, Card, Wordmark, inputClass, Isotype } from "@/components/ui";
 import { signIn } from "./actions";
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(signIn, undefined);
   return (
     <main className="min-h-screen flex items-center justify-center bg-snow text-ink relative overflow-hidden">
-      <Blob fill="periwinkle" className="absolute -top-24 -left-16 w-80 h-80 opacity-50" />
+      <Isotype className="absolute -top-24 -left-16 w-[26rem] h-[26rem] text-periwinkle/45 blur-[1px] -rotate-12" />
       <Card className="w-80 p-6 relative">
         <form action={formAction} className="space-y-3">
           <Wordmark href="/admin/pedidos" className="block text-center text-2xl" />
