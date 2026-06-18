@@ -2,6 +2,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductRow, VariantRow, ProductImageRow } from "@/lib/db-types";
+import { pickProductImage } from "@/domain/product-image";
 
 export interface CatalogProduct extends ProductRow {
   product_images: ProductImageRow[];
@@ -99,4 +100,92 @@ export async function getActiveProduct(id: string): Promise<ProductDetail | null
   const p = product as { product_lines: { slug: string } | { slug: string }[] } & Record<string, unknown>;
   const normalized = { ...p, product_lines: one(p.product_lines) } as unknown as CatalogProduct;
   return { product: normalized, variants: (variants ?? []) as VariantRow[] };
+}
+
+export interface SearchSuggestion {
+  id: string;
+  name: string;
+  price: number;
+  thumbnailUrl: string | null;
+}
+
+type SuggestRaw = {
+  id: string;
+  name: string;
+  price: number;
+  product_images: { url: string; color: string | null }[] | null;
+};
+
+/** Escape LIKE wildcards so user input is matched literally. */
+function likePattern(q: string): string {
+  return `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+}
+
+/**
+ * Active products whose name OR category name matches q. Two queries merged by id
+ * (avoids a cross-table PostgREST `.or` string). `select` is a PostgREST column spec;
+ * pass an optional limit for autocomplete.
+ */
+async function searchRows<T extends { id: string }>(
+  select: string,
+  q: string,
+  limit?: number,
+): Promise<T[]> {
+  const term = q.trim();
+  if (term === "") return [];
+  const supabase = await createClient();
+  const pat = likePattern(term);
+
+  const { data: catRows, error: catErr } = await supabase
+    .from("product_categories").select("id").ilike("name", pat);
+  if (catErr) throw catErr;
+  const catIds = (catRows ?? []).map((c) => (c as { id: string }).id);
+
+  let nameQ = supabase
+    .from("products").select(select)
+    .eq("status", "active").is("deleted_at", null)
+    .ilike("name", pat)
+    .order("created_at", { ascending: false });
+  if (limit) nameQ = nameQ.limit(limit);
+  const { data: byName, error: nameErr } = await nameQ;
+  if (nameErr) throw nameErr;
+
+  let byCat: unknown[] = [];
+  if (catIds.length > 0) {
+    let catQ = supabase
+      .from("products").select(select)
+      .eq("status", "active").is("deleted_at", null)
+      .in("category_id", catIds)
+      .order("created_at", { ascending: false });
+    if (limit) catQ = catQ.limit(limit);
+    const { data: catData, error: cErr } = await catQ;
+    if (cErr) throw cErr;
+    byCat = catData ?? [];
+  }
+
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const r of [...((byName ?? []) as unknown as T[]), ...(byCat as unknown as T[])]) {
+    if (seen.has(r.id)) continue;
+    seen.add(r.id);
+    out.push(r);
+  }
+  return limit ? out.slice(0, limit) : out;
+}
+
+/** Slim autocomplete suggestions (≤8) for products matching name or category. */
+export async function searchSuggestions(q: string): Promise<SearchSuggestion[]> {
+  const rows = await searchRows<SuggestRaw>("id,name,price,product_images(url,color)", q, 8);
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    price: r.price,
+    thumbnailUrl: pickProductImage(r.product_images ?? [], null),
+  }));
+}
+
+/** Full catalog items for products matching name or category (for the /buscar page). */
+export async function searchCatalog(q: string): Promise<CatalogItem[]> {
+  const rows = await searchRows<CatalogRaw>(CATALOG_SELECT, q);
+  return rows.map(toItem);
 }
