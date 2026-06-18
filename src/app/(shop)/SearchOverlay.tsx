@@ -19,14 +19,18 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   // focus on open; reset on close
   useEffect(() => {
     if (open) inputRef.current?.focus();
+    /* eslint-disable react-hooks/set-state-in-effect -- reset overlay state synchronously on close */
     else { setQ(""); setItems([]); setLoading(false); }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [open]);
 
   // debounced, cancelable fetch
   useEffect(() => {
     const term = q.trim();
+    /* eslint-disable react-hooks/set-state-in-effect -- synchronously reset/initialize loading state before debounce timer */
     if (term === "") { setItems([]); setLoading(false); return; }
     setLoading(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
     const t = setTimeout(() => {
       abortRef.current?.abort();
       const ac = new AbortController();

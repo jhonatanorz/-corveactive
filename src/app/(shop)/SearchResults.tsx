@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -55,7 +55,7 @@ export default function SearchResults({
 
   return (
     <main className="p-4">
-      <h1 className="mb-4 text-lg text-ink">Resultados para "{query}"</h1>
+      <h1 className="mb-4 text-lg text-ink">Resultados para “{query}”</h1>
 
       <div className="mb-4 space-y-3">
         {lines.length > 0 && (
