@@ -4,6 +4,7 @@ import type { ProductRow, VariantRow } from "@/lib/db-types";
 import type { ProductImageRow } from "@/lib/db-types";
 import type { ProductPayload } from "@/lib/admin/product-input";
 import type { ImageChoice } from "@/domain/product-image";
+import type { ImportPlan } from "@/lib/admin/product-csv";
 
 export interface ProductWithVariants {
   product: ProductRow;
@@ -144,4 +145,13 @@ export async function deleteProductImage(imageId: string): Promise<void> {
   }
   const { error } = await supabase.from("product_images").delete().eq("id", imageId);
   if (error) throw error;
+}
+
+/** Atomically create products + variants from a validated import plan. Returns
+ *  the number of products created. */
+export async function importProducts(plan: ImportPlan): Promise<number> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("import_products", { p_products: plan.products });
+  if (error) throw error;
+  return (data as number) ?? 0;
 }
