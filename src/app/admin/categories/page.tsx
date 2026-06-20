@@ -1,10 +1,15 @@
 // src/app/admin/categories/page.tsx
 import Link from "next/link";
-import { listCategories } from "@/lib/repos/categories";
+import { listCategories, countLiveProductsByCategory } from "@/lib/repos/categories";
+import { deleteCategory } from "./[id]/actions";
+import { DeleteCategoryButton } from "./DeleteCategoryButton";
 import { buttonClass, PageHeader, Table, THead, Th, Td, Tr, LinkRow, ChevronCell } from "@/components/ui";
 
 export default async function CategoriesPage() {
-  const categories = await listCategories();
+  const [categories, counts] = await Promise.all([
+    listCategories(),
+    countLiveProductsByCategory(),
+  ]);
   return (
     <div className="p-6">
       <PageHeader title="Categorías">
@@ -15,6 +20,7 @@ export default async function CategoriesPage() {
           <Th>Nombre</Th>
           <Th>Slug</Th>
           <Th>Orden</Th>
+          <Th className="w-28" />
           <Th className="w-8" />
         </THead>
         <tbody>
@@ -23,11 +29,18 @@ export default async function CategoriesPage() {
               <Td className="font-medium">{c.name}</Td>
               <Td className="text-ink-2">{c.slug}</Td>
               <Td className="text-ink-2">{c.sort_order}</Td>
+              <Td className="text-right">
+                <DeleteCategoryButton
+                  action={deleteCategory.bind(null, c.id)}
+                  count={counts[c.id] ?? 0}
+                  variant="icon"
+                />
+              </Td>
               <ChevronCell />
             </LinkRow>
           ))}
           {categories.length === 0 && (
-            <Tr><Td colSpan={4} className="py-8 text-center text-ink-3">Aún no hay categorías.</Td></Tr>
+            <Tr><Td colSpan={5} className="py-8 text-center text-ink-3">Aún no hay categorías.</Td></Tr>
           )}
         </tbody>
       </Table>
