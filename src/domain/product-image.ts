@@ -5,7 +5,9 @@ export interface ImageChoice {
 
 /**
  * Pick the image URL for a selected color: the color's own image, else the default
- * (color === null), else null (caller shows the placeholder). Pass null for the grid.
+ * (color === null), else the first available image, else null (caller shows the
+ * placeholder). Pass null for the grid. The first-image fallback ensures a product
+ * with only variant images (no default) still shows something.
  */
 export function pickProductImage(images: ImageChoice[], color: string | null): string | null {
   if (color !== null) {
@@ -13,5 +15,6 @@ export function pickProductImage(images: ImageChoice[], color: string | null): s
     if (match) return match.url;
   }
   const def = images.find((i) => i.color === null);
-  return def ? def.url : null;
+  if (def) return def.url;
+  return images[0]?.url ?? null;
 }
