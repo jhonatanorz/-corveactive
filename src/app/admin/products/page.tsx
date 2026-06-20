@@ -15,6 +15,9 @@ export default async function ProductsPage() {
   return (
     <div className="p-6">
       <PageHeader title="Productos">
+        <Link href="/admin/products/import" className={buttonClass("soft", "sm")}>
+          Importar CSV
+        </Link>
         <Link href="/admin/products/new" className={buttonClass("primary", "sm")}>
           + Nuevo producto
         </Link>
