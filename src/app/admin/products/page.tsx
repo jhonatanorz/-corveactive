@@ -1,17 +1,33 @@
 import Link from "next/link";
-import { listProducts } from "@/lib/repos/products";
-import { formatMXN } from "@/domain/money";
-import type { ProductStatus } from "@/domain/types";
-import { buttonClass, PageHeader, Table, THead, Th, Td, Tr, LinkRow, ChevronCell, Pill, type PillTone } from "@/components/ui";
-
-const STATUS_TONE: Record<ProductStatus, PillTone> = {
-  active: "success",
-  draft: "neutral",
-  hidden: "muted",
-};
+import { listProducts, imagesByProducts } from "@/lib/repos/products";
+import { listLines } from "@/lib/repos/lines";
+import { listCategories } from "@/lib/repos/categories";
+import { pickProductImage } from "@/domain/product-image";
+import { buttonClass, PageHeader } from "@/components/ui";
+import ProductsTable, { type ProductTableRow } from "./ProductsTable";
 
 export default async function ProductsPage() {
   const products = await listProducts();
+  const [imgByProduct, lines, categories] = await Promise.all([
+    imagesByProducts(products.map((p) => p.id)),
+    listLines(),
+    listCategories(),
+  ]);
+
+  const rows: ProductTableRow[] = products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    lineSlug: p.lineSlug,
+    categorySlug: p.categorySlug,
+    categoryName: p.categoryName,
+    price: p.price,
+    status: p.status,
+    imageUrl: pickProductImage(imgByProduct[p.id] ?? [], null),
+  }));
+
+  const lineOptions = lines.map((l) => ({ value: l.slug, label: l.name }));
+  const categoryOptions = categories.map((c) => ({ value: c.slug, label: c.name }));
+
   return (
     <div className="p-6">
       <PageHeader title="Productos">
@@ -22,29 +38,7 @@ export default async function ProductsPage() {
           + Nuevo producto
         </Link>
       </PageHeader>
-      <Table>
-        <THead>
-          <Th>Nombre</Th>
-          <Th>Línea</Th>
-          <Th>Precio</Th>
-          <Th>Estado</Th>
-          <Th className="w-8" />
-        </THead>
-        <tbody>
-          {products.map((p) => (
-            <LinkRow key={p.id} href={`/admin/products/${p.id}`}>
-              <Td className="font-medium">{p.name}</Td>
-              <Td className="text-ink-2">{p.lineSlug}</Td>
-              <Td>{formatMXN(p.price)}</Td>
-              <Td><Pill tone={STATUS_TONE[p.status]}>{p.status}</Pill></Td>
-              <ChevronCell />
-            </LinkRow>
-          ))}
-          {products.length === 0 && (
-            <Tr><Td colSpan={5} className="py-8 text-center text-ink-3">Aún no hay productos.</Td></Tr>
-          )}
-        </tbody>
-      </Table>
+      <ProductsTable rows={rows} lineOptions={lineOptions} categoryOptions={categoryOptions} />
     </div>
   );
 }
