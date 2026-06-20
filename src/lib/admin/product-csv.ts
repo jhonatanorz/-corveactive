@@ -101,7 +101,10 @@ export interface LookupRow {
 export interface ImportLookups {
   lines: LookupRow[];
   categories: LookupRow[];
-  existingNames: string[];
+  /** Non-deleted catalog products, keyed by the same (name, line, category)
+   *  identity used for rollup. A row is a create-only duplicate only when all
+   *  three match an existing product. */
+  existingProducts: { name: string; line_id: string; category_id: string }[];
 }
 
 export type ValidateResult =
@@ -165,7 +168,11 @@ export function validateImport(text: string, lookups: ImportLookups): ValidateRe
 
   const lineMap = buildLookupMap(lookups.lines);
   const catMap = buildLookupMap(lookups.categories);
-  const existing = new Set(lookups.existingNames.map((n) => n.trim().toLowerCase()));
+  const existing = new Set(
+    lookups.existingProducts.map(
+      (p) => `${p.name.trim().toLowerCase()}|${p.line_id}|${p.category_id}`,
+    ),
+  );
 
   const groups = new Map<string, Group>();
   const errors: RowError[] = [];
@@ -205,8 +212,12 @@ export function validateImport(text: string, lookups: ImportLookups): ValidateRe
       continue;
     }
 
-    if (existing.has(name.toLowerCase())) {
-      errors.push({ row: fileRow, field: "name", message: "Ya existe un producto con ese nombre." });
+    if (existing.has(`${name.toLowerCase()}|${line_id}|${category_id}`)) {
+      errors.push({
+        row: fileRow,
+        field: "name",
+        message: "Ya existe un producto con ese nombre en esa línea y categoría.",
+      });
       continue;
     }
 

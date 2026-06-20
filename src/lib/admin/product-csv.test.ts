@@ -51,7 +51,7 @@ const lookups: ImportLookups = {
     { id: "cat-leg", slug: "leggings", name: "Leggings" },
     { id: "cat-top", slug: "tops", name: "Tops" },
   ],
-  existingNames: ["Producto Existente"],
+  existingProducts: [{ name: "Producto Existente", line_id: "line-move", category_id: "cat-leg" }],
 };
 
 const header = "name,line,category,price,color,size,description";
@@ -155,11 +155,19 @@ describe("validateImport", () => {
     if (!r.ok) expect(r.errors.some((e) => e.field === "category")).toBe(true);
   });
 
-  it("errors when a product name already exists (create-only, case-insensitive)", () => {
+  it("errors when name+line+category already exists (create-only, case-insensitive)", () => {
     const csv = [header, "producto existente,MOVE,leggings,10,Negro,M,"].join("\n");
     const r = validateImport(csv, lookups);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errors.some((e) => e.field === "name")).toBe(true);
+  });
+
+  it("allows an existing name under a different line/category", () => {
+    // "Producto Existente" exists as MOVE/leggings; HIM/tops is a new product.
+    const csv = [header, "Producto Existente,HIM,tops,10,Negro,M,"].join("\n");
+    const r = validateImport(csv, lookups);
+    expect(r.ok).toBe(true);
+    expect(r.counts).toEqual({ products: 1, variants: 1 });
   });
 
   it("errors when same name+line+category rows disagree on price/description", () => {

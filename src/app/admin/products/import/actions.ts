@@ -14,14 +14,14 @@ async function loadLookups(): Promise<ImportLookups> {
   const [lines, categories, products] = await Promise.all([
     supabase.from("product_lines").select("id,slug,name"),
     supabase.from("product_categories").select("id,slug,name"),
-    supabase.from("products").select("name").is("deleted_at", null),
+    supabase.from("products").select("name,line_id,category_id").is("deleted_at", null),
   ]);
   const err = lines.error ?? categories.error ?? products.error;
   if (err) throw err;
   return {
     lines: (lines.data ?? []) as ImportLookups["lines"],
     categories: (categories.data ?? []) as ImportLookups["categories"],
-    existingNames: ((products.data ?? []) as { name: string }[]).map((p) => p.name),
+    existingProducts: (products.data ?? []) as ImportLookups["existingProducts"],
   };
 }
 
