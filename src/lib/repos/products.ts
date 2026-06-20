@@ -13,20 +13,31 @@ export interface ProductWithVariants {
 
 export interface ProductListRow extends ProductRow {
   lineSlug: string;
+  categorySlug: string;
+  categoryName: string;
 }
 
 export async function listProducts(): Promise<ProductListRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*, product_lines(slug)")
+    .select("*, product_lines(slug), product_categories(slug,name)")
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  type Raw = ProductRow & { product_lines: { slug: string } | { slug: string }[] | null };
+  type Raw = ProductRow & {
+    product_lines: { slug: string } | { slug: string }[] | null;
+    product_categories: { slug: string; name: string } | { slug: string; name: string }[] | null;
+  };
   return (data as Raw[]).map((r) => {
     const l = Array.isArray(r.product_lines) ? r.product_lines[0] : r.product_lines;
-    return { ...r, lineSlug: l?.slug ?? "" };
+    const c = Array.isArray(r.product_categories) ? r.product_categories[0] : r.product_categories;
+    return {
+      ...r,
+      lineSlug: l?.slug ?? "",
+      categorySlug: c?.slug ?? "",
+      categoryName: c?.name ?? "",
+    };
   });
 }
 
