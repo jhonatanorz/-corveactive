@@ -16,6 +16,8 @@ async function loadLookups(): Promise<ImportLookups> {
     supabase.from("product_categories").select("id,slug,name"),
     supabase.from("products").select("name").is("deleted_at", null),
   ]);
+  const err = lines.error ?? categories.error ?? products.error;
+  if (err) throw err;
   return {
     lines: (lines.data ?? []) as ImportLookups["lines"],
     categories: (categories.data ?? []) as ImportLookups["categories"],
