@@ -25,7 +25,7 @@ const STATUS_TONE: Record<ProductStatus, PillTone> = {
   hidden: "muted",
 };
 
-const selectClass = `${inputClass} w-44`;
+const selectClass = `${inputClass} !w-44 shrink-0`;
 
 export default function ProductsTable({
   rows,
@@ -48,13 +48,13 @@ export default function ProductsTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-nowrap items-center gap-3">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar producto…"
           aria-label="Buscar producto"
-          className={`${inputClass} w-64`}
+          className={`${inputClass} min-w-0 flex-1`}
         />
         <select value={lineSlug} onChange={(e) => setLineSlug(e.target.value)} aria-label="Línea" className={selectClass}>
           <option value="">Todas las líneas</option>
