@@ -8,7 +8,8 @@ export interface ColorOption {
 
 /**
  * Distinct colors for a product in first-seen variant order, each with its hex
- * (from the first occurrence) and its image (the color's own, else the default, else null).
+ * (from the first occurrence) and its image (the color's own, else the default,
+ * else the first available image, else null — see pickProductImage).
  */
 export function productColors(
   variants: { color: string; color_hex: string }[],
