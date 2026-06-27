@@ -8,7 +8,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const detail = await getActiveProduct(id);
   if (!detail) notFound();
   const { product, variants } = detail;
-  const images = product.product_images.map((i) => ({ url: i.url, color: i.color }));
+  const images = product.product_images.map((i) => ({ url: i.url, color: i.color, sortOrder: i.sort_order }));
 
   return (
     <ProductDetailClient

@@ -2,6 +2,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductRow, VariantRow, ProductImageRow } from "@/lib/db-types";
+import type { ImageChoice } from "@/domain/product-image";
 import { pickProductImage } from "@/domain/product-image";
 
 export interface CatalogProduct extends ProductRow {
@@ -16,12 +17,12 @@ export interface CatalogItem {
   lineSlug: string;
   categorySlug: string;
   categoryName: string;
-  images: { url: string; color: string | null }[];
+  images: ImageChoice[];
   colors: { color: string; color_hex: string }[];
 }
 
 const CATALOG_SELECT =
-  "id,name,price,product_lines!inner(slug),product_categories!inner(slug,name),product_images(url,color),variants(color,color_hex)";
+  "id,name,price,product_lines!inner(slug),product_categories!inner(slug,name),product_images(url,color,sort_order),variants(color,color_hex)";
 
 type CatalogRaw = {
   id: string;
@@ -29,7 +30,7 @@ type CatalogRaw = {
   price: number;
   product_lines: { slug: string } | { slug: string }[];
   product_categories: { slug: string; name: string } | { slug: string; name: string }[];
-  product_images: { url: string; color: string | null }[] | null;
+  product_images: { url: string; color: string | null; sort_order: number }[] | null;
   variants: { color: string; color_hex: string }[] | null;
 };
 
@@ -45,7 +46,7 @@ function toItem(r: CatalogRaw): CatalogItem {
     lineSlug: line.slug,
     categorySlug: cat.slug,
     categoryName: cat.name,
-    images: r.product_images ?? [],
+    images: (r.product_images ?? []).map((i) => ({ url: i.url, color: i.color, sortOrder: i.sort_order })),
     colors: r.variants ?? [],
   };
 }
@@ -113,7 +114,7 @@ type SuggestRaw = {
   id: string;
   name: string;
   price: number;
-  product_images: { url: string; color: string | null }[] | null;
+  product_images: { url: string; color: string | null; sort_order: number }[] | null;
 };
 
 /** Escape LIKE wildcards so user input is matched literally. */
@@ -175,12 +176,15 @@ async function searchRows<T extends { id: string }>(
 
 /** Slim autocomplete suggestions (≤8) for products matching name or category. */
 export async function searchSuggestions(q: string): Promise<SearchSuggestion[]> {
-  const rows = await searchRows<SuggestRaw>("id,name,price,product_images(url,color)", q, 8);
+  const rows = await searchRows<SuggestRaw>("id,name,price,product_images(url,color,sort_order)", q, 8);
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
     price: r.price,
-    thumbnailUrl: pickProductImage(r.product_images ?? [], null),
+    thumbnailUrl: pickProductImage(
+      (r.product_images ?? []).map((i) => ({ url: i.url, color: i.color, sortOrder: i.sort_order })),
+      null,
+    ),
   }));
 }
 

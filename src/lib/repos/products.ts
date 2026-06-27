@@ -95,11 +95,11 @@ export async function imagesByProducts(productIds: string[]): Promise<Record<str
   if (ids.length === 0) return {};
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("product_images").select("product_id,url,color").in("product_id", ids);
+    .from("product_images").select("product_id,url,color,sort_order").in("product_id", ids);
   if (error) throw error;
   const out: Record<string, ImageChoice[]> = {};
-  for (const r of (data ?? []) as { product_id: string; url: string; color: string | null }[]) {
-    (out[r.product_id] ??= []).push({ url: r.url, color: r.color });
+  for (const r of (data ?? []) as { product_id: string; url: string; color: string | null; sort_order: number }[]) {
+    (out[r.product_id] ??= []).push({ url: r.url, color: r.color, sortOrder: r.sort_order });
   }
   return out;
 }
