@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { getProduct, listImages } from "@/lib/repos/products";
 import { listActiveLines } from "@/lib/repos/lines";
 import { listCategories } from "@/lib/repos/categories";
-import { saveProduct, addVariant, editVariant, uploadImage, deleteImage, deleteProduct } from "./actions";
+import { saveProduct, addVariant, editVariant, uploadImage, deleteProduct } from "./actions";
 import ProductForm from "./ProductForm";
 import { DeleteProductButton } from "./DeleteProductButton";
+import ImageGallery from "./ImageGallery";
 import { Button, Card, Eyebrow, ImageUploader } from "@/components/ui";
 
 const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
@@ -55,22 +56,8 @@ export default async function ProductEditorPage({
             {/* Imágenes */}
             <Card className="space-y-3 p-4">
               <Eyebrow>Imágenes</Eyebrow>
-              {images.length > 0 && (
-                <div className="flex flex-wrap gap-3">
-                  {images.map((img) => (
-                    <div key={img.id} className="text-center">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img.url} alt="" className="h-20 w-16 rounded object-cover" />
-                      <div className="text-[10px] text-ink-2">{img.color ?? "Default"}</div>
-                      <form action={deleteImage.bind(null, id)}>
-                        <input type="hidden" name="imageId" value={img.id} />
-                        <button className="text-[10px] text-red-600">eliminar</button>
-                      </form>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <ImageUploader action={uploadImage.bind(null, id)} colors={colors} />
+              <ImageGallery key={images.map((i) => `${i.id}:${i.sort_order}`).join(",")} productId={id} images={images} />
+              <ImageUploader action={uploadImage.bind(null, id)} colors={colors} multiple />
             </Card>
 
             {/* Variantes */}

@@ -8,32 +8,41 @@ import { Button, inputClass } from "@/components/ui";
 export function ImageUploader({
   action,
   colors,
+  multiple = false,
 }: {
   action: (formData: FormData) => void | Promise<void>;
   colors: string[];
+  multiple?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
 
-  function setFile(file: File | null) {
-    setFileName(file ? file.name : null);
+  function setFiles(files: FileList | File[] | null) {
+    const list = files ? Array.from(files) : [];
+    setFileName(
+      list.length === 0
+        ? null
+        : list.length === 1
+          ? list[0].name
+          : `${list.length} imágenes seleccionadas`,
+    );
     setPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev);
-      return file ? URL.createObjectURL(file) : null;
+      return list[0] ? URL.createObjectURL(list[0]) : null;
     });
   }
 
   function onDrop(e: DragEvent<HTMLLabelElement>) {
     e.preventDefault();
     setDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && inputRef.current) {
+    const dropped = Array.from(e.dataTransfer.files ?? []);
+    if (dropped.length > 0 && inputRef.current) {
       const dt = new DataTransfer();
-      dt.items.add(file);
+      for (const f of dropped) dt.items.add(f);
       inputRef.current.files = dt.files;
-      setFile(file);
+      setFiles(dropped);
     }
   }
 
@@ -71,8 +80,9 @@ export function ImageUploader({
           type="file"
           name="image"
           accept="image/*"
+          multiple={multiple}
           className="hidden"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          onChange={(e) => setFiles(e.target.files)}
         />
       </label>
       <div className="flex flex-wrap items-center gap-2">
