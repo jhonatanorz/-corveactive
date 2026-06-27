@@ -112,27 +112,46 @@ export async function listImages(productId: string): Promise<ProductImageRow[]> 
   return data as ProductImageRow[];
 }
 
-/** Upload a product image, optionally tagged with a color (null = default). One image
- *  per (product, color): any existing image for that color is removed first. */
+/** Upload a product image, optionally tagged with a color (null = default). Appends
+ *  to the color group: sort_order = max(group) + 1. Multiple images per color allowed. */
 export async function addProductImage(productId: string, file: File, color: string | null = null): Promise<void> {
   const supabase = await createClient();
 
-  // remove existing image(s) for this (product, color), incl. best-effort storage cleanup
-  const base = supabase.from("product_images").select("id,url").eq("product_id", productId);
+  // next sort_order within this (product, color) group
+  const base = supabase.from("product_images").select("sort_order").eq("product_id", productId);
   const { data: existing } = await (color === null ? base.is("color", null) : base.eq("color", color));
-  for (const row of (existing ?? []) as { id: string; url: string }[]) {
-    const path = row.url.split("/product-images/")[1];
-    if (path) await supabase.storage.from("product-images").remove([decodeURIComponent(path)]);
-    await supabase.from("product_images").delete().eq("id", row.id);
-  }
+  const next = (existing ?? []).reduce(
+    (m, r) => Math.max(m, (r as { sort_order: number }).sort_order + 1),
+    0,
+  );
 
   const path = `products/${productId}/${Date.now()}-${file.name}`;
   const { error: upErr } = await supabase.storage.from("product-images").upload(path, file);
   if (upErr) throw upErr;
   const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
   const { error } = await supabase.from("product_images")
-    .insert({ product_id: productId, url: pub.publicUrl, sort_order: 0, color });
+    .insert({ product_id: productId, url: pub.publicUrl, sort_order: next, color });
   if (error) throw error;
+}
+
+/** Persist a new order for one color group: sort_order = position in orderedIds.
+ *  Scoped to the product + color group for safety. */
+export async function reorderImages(
+  productId: string,
+  color: string | null,
+  orderedIds: string[],
+): Promise<void> {
+  const supabase = await createClient();
+  for (let i = 0; i < orderedIds.length; i++) {
+    let q = supabase
+      .from("product_images")
+      .update({ sort_order: i })
+      .eq("id", orderedIds[i])
+      .eq("product_id", productId);
+    q = color === null ? q.is("color", null) : q.eq("color", color);
+    const { error } = await q;
+    if (error) throw error;
+  }
 }
 
 /** Delete a product image (DB row + best-effort storage object). */

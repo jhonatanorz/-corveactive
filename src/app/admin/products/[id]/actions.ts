@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { validateProductInput } from "@/lib/admin/product-input";
-import { createProduct, updateProduct, saveVariants, updateVariant, softDeleteProduct, addProductImage, deleteProductImage } from "@/lib/repos/products";
+import { createProduct, updateProduct, saveVariants, updateVariant, softDeleteProduct, addProductImage, deleteProductImage, reorderImages as reorderImagesRepo } from "@/lib/repos/products";
 import { setFlash, withFlash } from "@/lib/flash";
 
 export async function saveProduct(
@@ -63,10 +63,13 @@ export async function editVariant(productId: string, formData: FormData): Promis
 }
 
 export async function uploadImage(productId: string, formData: FormData): Promise<void> {
-  const file = formData.get("image");
-  if (!(file instanceof File) || file.size === 0) return;
+  const files = formData.getAll("image").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length === 0) return;
   const color = String(formData.get("color") ?? "").trim() || null;
-  await withFlash("Imagen subida", () => addProductImage(productId, file, color));
+  const label = files.length === 1 ? "Imagen subida" : `${files.length} imágenes subidas`;
+  await withFlash(label, async () => {
+    for (const file of files) await addProductImage(productId, file, color);
+  });
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/");
   revalidatePath(`/producto/${productId}`);
@@ -76,6 +79,18 @@ export async function deleteImage(productId: string, formData: FormData): Promis
   const imageId = String(formData.get("imageId") ?? "");
   if (!imageId) return;
   await withFlash("Imagen eliminada", () => deleteProductImage(imageId));
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath("/");
+  revalidatePath(`/producto/${productId}`);
+}
+
+export async function reorderImages(
+  productId: string,
+  color: string | null,
+  orderedIds: string[],
+): Promise<void> {
+  if (orderedIds.length === 0) return;
+  await reorderImagesRepo(productId, color, orderedIds);
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/");
   revalidatePath(`/producto/${productId}`);
