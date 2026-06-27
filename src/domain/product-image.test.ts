@@ -42,7 +42,17 @@ describe("pickProductImage", () => {
   it("returns null when there are no images", () => {
     expect(pickProductImage([], "Negro")).toBeNull();
   });
-  it("returns null when no default and the color has no image", () => {
-    expect(pickProductImage([{ url: "n.jpg", color: "Negro", sortOrder: 0 }], "Arena")).toBeNull();
+  it("falls back to the first image when no default and the color has no image", () => {
+    expect(pickProductImage([{ url: "negro.jpg", color: "Negro", sortOrder: 0 }], "Arena")).toBe("negro.jpg");
+  });
+  it("falls back to the first variant image (by sortOrder) for the grid when there is no default", () => {
+    const variantOnly: ImageChoice[] = [
+      { url: "negro.jpg", color: "Negro", sortOrder: 1 },
+      { url: "blanco.jpg", color: "Blanco", sortOrder: 0 },
+    ];
+    expect(pickProductImage(variantOnly, null)).toBe("blanco.jpg");
+  });
+  it("still prefers the default over a variant image for the grid", () => {
+    expect(pickProductImage(imgs, null)).toBe("default-a.jpg");
   });
 });

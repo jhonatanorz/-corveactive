@@ -21,8 +21,12 @@ describe("productColors", () => {
     expect(r.find((c) => c.color === "Negro")!.url).toBe("negro.jpg");
     expect(r.find((c) => c.color === "Arena")!.url).toBe("default.jpg");
   });
-  it("url is null when the color has no image and there is no default", () => {
+  it("falls back to the first image when the color has no image and there is no default", () => {
     const r = productColors([{ color: "Arena", color_hex: "#caa" }], [{ url: "negro.jpg", color: "Negro", sortOrder: 0 }]);
+    expect(r[0].url).toBe("negro.jpg");
+  });
+  it("url is null when there are no images at all", () => {
+    const r = productColors([{ color: "Arena", color_hex: "#caa" }], []);
     expect(r[0].url).toBeNull();
   });
   it("returns [] for no variants", () => {

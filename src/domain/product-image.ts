@@ -23,11 +23,15 @@ export function imagesForColor(images: ImageChoice[], color: string | null): Ima
 }
 
 /**
- * The primary image URL for a color = the first of imagesForColor(images, color),
- * or null when there are none. Used by the grid tile, the cart line image, and the
- * detail hero default.
+ * The primary image URL for a color = the first of imagesForColor(images, color):
+ * the color's own primary, else the Default primary. If neither exists, fall back
+ * to the first available image overall (by sortOrder) so a product with only
+ * variant images — no default — still shows something; else null (caller shows the
+ * placeholder). Pass null for the grid. Used by the grid tile, the cart line image,
+ * and the detail hero default.
  */
 export function pickProductImage(images: ImageChoice[], color: string | null): string | null {
   const list = imagesForColor(images, color);
-  return list.length > 0 ? list[0].url : null;
+  if (list.length > 0) return list[0].url;
+  return byOrder(images)[0]?.url ?? null;
 }

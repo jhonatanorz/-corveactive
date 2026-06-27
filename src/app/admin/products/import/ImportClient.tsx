@@ -1,13 +1,26 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type DragEvent } from "react";
 import { Button } from "@/components/ui";
 import { previewImport, commitImport, type PreviewState } from "./actions";
 
 export default function ImportClient() {
   const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [state, setState] = useState<PreviewState>(undefined);
   const [pending, startTransition] = useTransition();
+
+  // Choosing/dropping a new file clears any prior preview/confirm result.
+  function chooseFile(f: File | null) {
+    setFile(f);
+    setState(undefined);
+  }
+
+  function onDrop(e: DragEvent<HTMLLabelElement>) {
+    e.preventDefault();
+    setDragging(false);
+    chooseFile(e.dataTransfer.files?.[0] ?? null);
+  }
 
   function run(action: typeof previewImport) {
     if (!file) {
@@ -27,21 +40,40 @@ export default function ImportClient() {
 
   return (
     <div className="space-y-4 text-sm">
-      <div className="flex items-center gap-3">
+      <label
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+        className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-center transition ${
+          dragging
+            ? "border-royal bg-periwinkle-2/40"
+            : "border-line bg-mist/30 hover:border-royal/60 hover:bg-mist/50"
+        }`}
+      >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-royal">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        <span className="text-sm font-medium text-ink">
+          {file ? file.name : "Arrastra tu CSV o haz clic para elegir"}
+        </span>
+        <span className="text-xs text-ink-3">Archivo .csv</span>
         <input
           type="file"
           accept=".csv,text/csv"
-          onChange={(e) => {
-            setFile(e.target.files?.[0] ?? null);
-            setState(undefined);
-          }}
-          className="text-ink-2"
+          className="hidden"
+          onChange={(e) => chooseFile(e.target.files?.[0] ?? null)}
         />
-        <Button type="button" variant="ghost" size="md" disabled={pending || !file}
-          onClick={() => run(previewImport)}>
-          {pending ? "Validando…" : "Previsualizar"}
-        </Button>
-      </div>
+      </label>
+
+      <Button type="button" variant="ghost" size="md" disabled={pending || !file}
+        onClick={() => run(previewImport)}>
+        {pending ? "Validando…" : "Previsualizar"}
+      </Button>
 
       {fileError && <p className="text-red-600">{fileError}</p>}
 

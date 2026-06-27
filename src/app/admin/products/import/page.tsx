@@ -11,8 +11,15 @@ export default function ImportProductsPage() {
         </Link>
       </PageHeader>
       <p className="text-sm text-ink-2">
-        Sube un archivo CSV con columnas: <code>name, line, category, price, color, size, description</code>.
-        Cada fila es una variante; las filas con el mismo <code>name</code> se agrupan en un producto.
+        Sube un archivo CSV. Columnas requeridas:{" "}
+        <code>name, line, category, price, color, size</code>. Opcional: <code>description</code>.
+      </p>
+      <p className="text-sm text-ink-2">
+        Cada fila es una variante (color + talla). Las filas se agrupan en un mismo producto
+        cuando coinciden <strong>name + line + category</strong>; un mismo <code>name</code> en
+        otra línea o categoría es un producto distinto. <code>price</code> y{" "}
+        <code>description</code> deben ser iguales en todas las filas de un mismo producto.
+        Se rechazan variantes (color/talla) duplicadas y productos que ya existen.
       </p>
       <ImportClient />
     </div>
